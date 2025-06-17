@@ -71,3 +71,17 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Cache folders
+/[Aa]ssets/StreamingAssets/aa/
+/[Aa]ssets/AddressableAssetsData/*/*.bin*
+
+# Unity cache server and collaboration files
+/.cache/
+/.collab/
+
+# Unity Cloud Build
+/[Uu]nity[Cc]loud[Bb]uild/
+
+# Package Manager cache
+/Packages/packages-lock.json
