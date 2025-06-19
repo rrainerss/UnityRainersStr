@@ -14,7 +14,7 @@ public class WheelProperties
 
     [HideInInspector] public float lastSuspensionLength = 0.0f;
     public float mass = 16f;
-    public float size = 0.5f;
+    public float size = 0.5f;  // wheel radius, used for positioning & circumference
     public float engineTorque = 40f;
     public float brakeStrength = 0.5f;
     public bool slidding = false;
@@ -90,7 +90,6 @@ public class Car : MonoBehaviour
 
     void Update()
     {
-        //possible steering high speed fix
         float speedFactor = Mathf.Clamp01(rb.linearVelocity.magnitude / 30f);
         float steerInputTarget = Input.GetAxisRaw("Horizontal") * Mathf.Lerp(1f, 0.1f, speedFactor * speedFactor);
         userInput.x = Mathf.Lerp(userInput.x, steerInputTarget, Mathf.Lerp(0.1f, 0.3f, 1f - speedFactor));
@@ -135,7 +134,7 @@ public class Car : MonoBehaviour
         foreach (var w in wheels)
         {
             RaycastHit hit;
-            float rayLen = w.size * 2f + w.suspensionLength;
+            float rayLen = w.size + w.suspensionLength;
             Transform wheelObj = w.wheelObject.transform;
             Transform wheelVisual = wheelObj.GetChild(0);
 
@@ -193,6 +192,8 @@ public class Car : MonoBehaviour
 
                 rb.AddForceAtPosition(springDir + totalWorldForce, hit.point);
                 w.lastSuspensionLength = hit.distance;
+
+                // Since pivot is center of wheel mesh, raise wheel by radius to sit properly on ground
                 wheelObj.position = hit.point + transform.up * w.size;
 
                 if (w.slidding)
