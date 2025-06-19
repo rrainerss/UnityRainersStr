@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,8 +9,16 @@ public class GameManager : MonoBehaviour
 
     public TMP_Text timerText;
     public TMP_Text bestTimeText;
-    public TMP_Text startUI;
-    public TMP_Text finishUI;
+    public TMP_Text finishText;
+
+    public Image lightPanel;
+    public Image light1;
+    public Image light2;
+    public Image light3;
+
+    public Color lightGoColor = Color.green;
+    public Color lightStopColor = Color.red;
+    public Color lightOffColor = Color.gray;
 
     private float currentTime = 0f;
     private float bestTime = Mathf.Infinity;
@@ -24,7 +33,7 @@ public class GameManager : MonoBehaviour
     {
         bestTime = PlayerPrefs.GetFloat("BestTime", Mathf.Infinity);
         UpdateBestTimeUI();
-        ShowStartUI();
+        StartCoroutine(Countdown());
     }
 
     void Update()
@@ -34,6 +43,34 @@ public class GameManager : MonoBehaviour
             currentTime += Time.deltaTime;
             timerText.text = currentTime.ToString("F2") + "s";
         }
+    }
+
+    IEnumerator Countdown()
+    {
+        light1.color = lightOffColor;
+        light2.color = lightOffColor;
+        light3.color = lightOffColor;
+
+        yield return new WaitForSeconds(2f);
+
+        light1.color = lightStopColor;
+        yield return new WaitForSeconds(1f);
+
+        light2.color = lightStopColor;
+        yield return new WaitForSeconds(1f);
+
+        light3.color = lightStopColor;
+        yield return new WaitForSeconds(1f);
+
+        light1.color = lightGoColor;
+        light2.color = lightGoColor;
+        light3.color = lightGoColor;
+
+        yield return new WaitForSeconds(1.5f);
+
+        light1.color = lightOffColor;
+        light2.color = lightOffColor;
+        light3.color = lightOffColor;
     }
 
     public void StartRace()
@@ -66,19 +103,22 @@ public class GameManager : MonoBehaviour
 
     void ShowStartUI()
     {
-        startUI.enabled = true;
-        finishUI.enabled = false;
+        lightPanel.gameObject.SetActive(true);
+        finishText.gameObject.SetActive(false);
+        timerText.gameObject.SetActive(false);
     }
 
     void ShowTimerUI()
     {
-        startUI.enabled = false;
-        finishUI.enabled = false;
+        lightPanel.gameObject.SetActive(false);
+        finishText.gameObject.SetActive(false);
+        timerText.gameObject.SetActive(true);
     }
 
     void ShowFinishUI()
     {
-        finishUI.enabled = true;
+        finishText.gameObject.SetActive(true);
+        timerText.gameObject.SetActive(false);
     }
 
     public void RestartRace()
