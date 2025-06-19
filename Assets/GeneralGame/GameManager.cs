@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public LiftController liftController;
+
     public TMP_Text timerText;
     public TMP_Text bestTimeText;
     public TMP_Text finishText;
@@ -34,6 +36,7 @@ public class GameManager : MonoBehaviour
         bestTime = PlayerPrefs.GetFloat("BestTime", Mathf.Infinity);
         UpdateBestTimeUI();
         StartCoroutine(Countdown());
+        liftController.StartLowering();
     }
 
     void Update()
