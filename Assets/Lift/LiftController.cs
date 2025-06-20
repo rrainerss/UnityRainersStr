@@ -14,15 +14,15 @@ public class LiftController : MonoBehaviour
     public float armRotationAngle = 45f;
     public float armsMoveDuration = 3f;
 
-    private Vector3 platformStartPos;
+    private Vector3 platformStartPos; //Start positions
     private Vector3 platformTargetPos;
 
-    private Vector3 arm1StartPos;
+    private Vector3 arm1StartPos; //Start positions
     private Vector3 arm2StartPos;
     private Vector3 arm1TargetPos;
     private Vector3 arm2TargetPos;
 
-    private Quaternion arm1StartRot;
+    private Quaternion arm1StartRot; //Start rotations
     private Quaternion arm2StartRot;
     private Quaternion arm1TargetRot;
     private Quaternion arm2TargetRot;
@@ -35,17 +35,17 @@ public class LiftController : MonoBehaviour
 
     void Start()
     {
-        // Initialize start and target positions for platform
+        //Set start and target positions for platform
         platformStartPos = platform.position;
         platformTargetPos = platformStartPos - new Vector3(0, platformLowerDistance, 0);
 
-        // Initialize start and target positions for arms
+        //Set start and target positions for arms
         arm1StartPos = arm1.position;
         arm2StartPos = arm2.position;
         arm1TargetPos = arm1StartPos - new Vector3(0, armLowerDistance, 0);
         arm2TargetPos = arm2StartPos - new Vector3(0, armLowerDistance, 0);
 
-        // Initialize start and target rotations for arms
+        //Set start and target rotations for arms
         arm1StartRot = arm1.localRotation;
         arm2StartRot = arm2.localRotation;
         arm1TargetRot = arm1StartRot * Quaternion.Euler(armRotationAngle, 0, 0);
@@ -83,6 +83,7 @@ public class LiftController : MonoBehaviour
         }
     }
 
+    //Called from game manager
     public void StartLowering()
     {
         platformMoveProgress = 0f;

@@ -6,9 +6,9 @@
 
         void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag("Player")) return;
+            if (!other.CompareTag("Player")) return; //Must be the player going through
 
-            if (isStartZone)
+            if (isStartZone) //Start or finish trigger
             {
                 GameManager.Instance.StartRace();
             }

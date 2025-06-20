@@ -2,16 +2,16 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public Transform target;
-    public Transform fixedCameraPoint;
-    public float transitionDuration = 2f;
+    public Transform target; //Moving target
+    public Transform fixedCameraPoint; //Fixed start
+    public float transitionDuration = 2f; //Animation duration (s)
 
     private float transitionProgress = 0f;
-    private bool transitioning = true;
+    private bool transitioning = true; //These bools switch between each other
     private bool justFollow = false;
 
     public Vector3 followOffset = new Vector3(0, 2.2f, -7f);
-    private Vector3 followVelocity = Vector3.zero;
+    private Vector3 followVelocity = Vector3.zero; //"Damping"??
     public float followSmoothTime = 0.05f;
 
     private Camera cam;
@@ -24,7 +24,7 @@ public class CameraController : MonoBehaviour
         cam = GetComponent<Camera>();
         if (cam == null || target == null || fixedCameraPoint == null)
         {
-            Debug.LogError("Camera, target, or fixedCameraPoint missing!");
+            Debug.LogError("References missing"); //Disable script if not setup
             enabled = false;
             return;
         }
@@ -37,6 +37,7 @@ public class CameraController : MonoBehaviour
         Cursor.visible = false;
     }
 
+    //Once per frame loop
     void Update()
     {
         //Zoom control
@@ -48,6 +49,7 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    //FPS independent loop
     void FixedUpdate()
     {
         if (transitioning)
@@ -61,23 +63,24 @@ public class CameraController : MonoBehaviour
             }
 
             Vector3 followPos = target.position + target.TransformDirection(followOffset);
-            Vector3 pos = Vector3.Lerp(fixedCameraPoint.position, followPos, transitionProgress);
+            Vector3 pos = Vector3.Lerp(fixedCameraPoint.position, followPos, transitionProgress); //Interpolation between points
 
             Vector3 lookTarget = target.position + Vector3.up * 1.2f;
             Quaternion rotStart = fixedCameraPoint.rotation;
             Quaternion rotEnd = Quaternion.LookRotation(lookTarget - pos);
-            Quaternion rot = Quaternion.Slerp(rotStart, rotEnd, transitionProgress);
+            Quaternion rot = Quaternion.Slerp(rotStart, rotEnd, transitionProgress); //Interpolates rotation between the points
 
             transform.position = pos;
             transform.rotation = rot;
         }
+
         else if (justFollow)
         {
-            //Smooth follow 
+            //Just follow the car once transition is done
             Vector3 desiredPos = target.position + target.TransformDirection(followOffset);
 
             Rigidbody rb = target.GetComponent<Rigidbody>();
-            Vector3 velocityOffset = rb != null ? rb.linearVelocity * 0.02f : Vector3.zero;
+            Vector3 velocityOffset = rb != null ? rb.linearVelocity * 0.02f : Vector3.zero; //Physics feature! (technically)
 
             transform.position = Vector3.SmoothDamp(transform.position, desiredPos + velocityOffset, ref followVelocity, followSmoothTime);
 

@@ -8,59 +8,51 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public LiftController liftController;
+    private Animator lightAnimator; //Traffic light thing
+
+    public LiftController liftController; //Animated car lift
 
     public TMP_Text timerText;
-    public TMP_Text bestTimeText;
+    public TMP_Text bestTimeText; //Text elements
     public TMP_Text finishText;
 
     public Image lightPanel;
     public Image light1;
-    public Image light2;
+    public Image light2; //Individual lights
     public Image light3;
 
     public Color lightGoColor = Color.green;
-    public Color lightStopColor = Color.red;
+    public Color lightStopColor = Color.red; //Predefined colors
     public Color lightOffColor = Color.gray;
 
     private float currentTime = 0f;
     private float bestTime = Mathf.Infinity;
     private bool isRacing = false;
     private bool countdownFinished = false;
-    public GameObject restartButton;
 
+    //Runs just once
     void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;   
+        }
         else Destroy(gameObject);
     }
 
+    //Runs once per game
     void Start()
     {
+        lightAnimator = lightPanel.GetComponent<Animator>();
         bestTime = PlayerPrefs.GetFloat("BestTime", Mathf.Infinity);
-        UpdateBestTimeUI();
-        StartCoroutine(Countdown());
-        liftController.StartLowering();
+
+        UpdateBestTimeUI(); //Set previous best time
+        StartCoroutine(Countdown()); //Traffic light thing
+        liftController.StartLowering(); //Lower lift
 
         ShowStartUI();
         timerText.text = "0.00s";
         finishText.gameObject.SetActive(false);
-
-        if (restartButton != null)
-        {
-            restartButton.SetActive(false);
-
-            Button btn = restartButton.GetComponent<Button>();
-            if (btn != null)
-            {
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(RestartRace);
-            }
-            else
-            {
-                Debug.LogWarning("Restart button GameObject has no Button component!");
-            }
-        }
     }
 
     void Update()
@@ -68,16 +60,16 @@ public class GameManager : MonoBehaviour
         if (isRacing)
         {
             currentTime += Time.deltaTime;
-            timerText.text = currentTime.ToString("F2") + "s";
+            timerText.text = currentTime.ToString("F2") + "s"; //Set current time, float + 2 decimal places
         }
 
         if (Input.GetKeyDown(KeyCode.R))
         {
-            RestartRace();
+            RestartRace(); //Restart at any time
         }
     }
 
-    IEnumerator Countdown()
+    IEnumerator Countdown() //Runs independently in coroutine
     {
         light1.color = lightOffColor;
         light2.color = lightOffColor;
@@ -105,30 +97,23 @@ public class GameManager : MonoBehaviour
         light3.color = lightOffColor;
 
         countdownFinished = true;
-        Debug.Log("Countdown finished! Ready to start race by crossing the start trigger.");
     }
 
     public void StartRace()
     {
         if (!countdownFinished)
         {
-            Debug.Log("Cannot start race yet, countdown not finished.");
-            return;
+            return; //Not allowed to start timer before lights go off
         }
 
         if (isRacing)
         {
-            Debug.Log("Race already started.");
             return;
         }
 
         currentTime = 0f;
         isRacing = true;
-        Debug.Log("Race started!");
         ShowTimerUI();
-
-        if (restartButton != null)
-            restartButton.SetActive(false);
     }
 
     public void FinishRace()
@@ -137,24 +122,19 @@ public class GameManager : MonoBehaviour
 
         isRacing = false;
 
-        if (currentTime < bestTime)
+        if (currentTime < bestTime) //New best time?
         {
             bestTime = currentTime;
-            PlayerPrefs.SetFloat("BestTime", bestTime);
+            PlayerPrefs.SetFloat("BestTime", bestTime); //Save to prefs
             PlayerPrefs.Save();
-            Debug.Log("New best time: " + bestTime.ToString("F2") + "s");
         }
 
         UpdateBestTimeUI();
         ShowFinishUI();
-
-        if (restartButton != null)
-            restartButton.SetActive(true);
     }
 
     public void RestartRace()
     {
-        Debug.Log("Restart button clicked - restarting scene.");
         SceneManager.LoadScene(0);
     }
 
@@ -166,14 +146,13 @@ public class GameManager : MonoBehaviour
 
     void ShowStartUI()
     {
-        lightPanel.gameObject.SetActive(true);
         finishText.gameObject.SetActive(false);
         timerText.gameObject.SetActive(false);
     }
 
     void ShowTimerUI()
     {
-        lightPanel.gameObject.SetActive(false);
+        lightAnimator.SetTrigger("HideLight"); //Light hide animation
         finishText.gameObject.SetActive(false);
         timerText.gameObject.SetActive(true);
     }
@@ -182,6 +161,5 @@ public class GameManager : MonoBehaviour
     {
         finishText.gameObject.SetActive(true);
         timerText.gameObject.SetActive(false);
-        lightPanel.gameObject.SetActive(false);
     }
 }

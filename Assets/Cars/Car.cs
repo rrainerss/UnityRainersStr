@@ -47,7 +47,7 @@ public class Car : MonoBehaviour
     public float suspensionForce = 90f;
     public float dampAmount = 2.5f;
     public float suspensionForceClamp = 200f;
-    public Rigidbody rb;
+    public Rigidbody rb; //physics engine feature
     [HideInInspector] public bool forwards = true;
 
     public bool steeringAssist = true;
@@ -92,9 +92,9 @@ public class Car : MonoBehaviour
     {
         float speedFactor = Mathf.Clamp01(rb.linearVelocity.magnitude / 30f);
         float steerInputTarget = Input.GetAxisRaw("Horizontal") * Mathf.Lerp(1f, 0.1f, speedFactor * speedFactor);
-        userInput.x = Mathf.Lerp(userInput.x, steerInputTarget, Mathf.Lerp(0.1f, 0.3f, 1f - speedFactor));
+        userInput.x = Mathf.Lerp(userInput.x, steerInputTarget, Mathf.Lerp(0.1f, 0.3f, 1f - speedFactor)); //interpolation lerp
 
-        userInput.y = Mathf.Lerp(userInput.y, Input.GetAxisRaw("Vertical"), 0.2f);
+        userInput.y = Mathf.Lerp(userInput.y, Input.GetAxisRaw("Vertical"), 0.2f); //interpolation lerp
         bool isBraking = Input.GetKey(KeyCode.S) && forwards;
         if (isBraking) userInput.y = 0;
 
@@ -105,16 +105,16 @@ public class Car : MonoBehaviour
         for (int i = 0; i < wheels.Length; i++)
         {
             if (throttleAssist && maxSlip > 0.96f)
-                userInput.y = Mathf.Lerp(userInput.y, 0, maxSlip);
+                userInput.y = Mathf.Lerp(userInput.y, 0, maxSlip); //interpolation lerp
 
             if (steeringAssist && maxSlip > 0.7f)
-                userInput.x = Mathf.Lerp(userInput.x, 0, 0.05f);
+                userInput.x = Mathf.Lerp(userInput.x, 0, 0.05f); //interpolation lerp
 
             if (maxSlip > 1.0f && wheels[i].localVelocity.magnitude > 0.1f)
             {
                 float angle = Mathf.Atan2(wheels[i].localVelocity.x, wheels[i].localVelocity.z) * Mathf.Rad2Deg;
                 wheels[i].input = new Vector2(
-                    Mathf.Lerp(wheels[i].input.x, Mathf.Clamp(angle / wheels[i].turnAngle, -1f, 1f), 0.1f),
+                    Mathf.Lerp(wheels[i].input.x, Mathf.Clamp(angle / wheels[i].turnAngle, -1f, 1f), 0.1f), //interpolation lerp
                     wheels[i].input.y
                 );
             }
@@ -122,14 +122,14 @@ public class Car : MonoBehaviour
             if (brakeAssist && maxSlip > 0.99f)
                 isBraking = false;
 
-            wheels[i].braking = Mathf.Lerp(wheels[i].braking, (float)(isBraking ? 1 : 0), 0.2f);
+            wheels[i].braking = Mathf.Lerp(wheels[i].braking, (float)(isBraking ? 1 : 0), 0.2f); //interpolation lerp
             wheels[i].input = new Vector2(userInput.x, userInput.y);
         }
     }
 
     void FixedUpdate()
     {
-        rb.AddForce(-transform.up * rb.linearVelocity.magnitude * downforce);
+        rb.AddForce(-transform.up * rb.linearVelocity.magnitude * downforce); //physics engine feature
 
         foreach (var w in wheels)
         {
@@ -140,7 +140,7 @@ public class Car : MonoBehaviour
 
             wheelObj.localRotation = Quaternion.Euler(0, w.turnAngle * w.input.x, 0);
             w.wheelWorldPosition = transform.TransformPoint(w.localPosition);
-            Vector3 velocityAtWheel = rb.GetPointVelocity(w.wheelWorldPosition);
+            Vector3 velocityAtWheel = rb.GetPointVelocity(w.wheelWorldPosition); //physicsenginefeature
             w.localVelocity = wheelObj.InverseTransformDirection(velocityAtWheel);
             forwards = w.localVelocity.z > 0.1f;
             w.torque = w.engineTorque * w.input.y;
@@ -148,7 +148,7 @@ public class Car : MonoBehaviour
             float inertia = w.mass * w.size * w.size / 2f;
             float lateralVel = w.localVelocity.x;
 
-            bool grounded = Physics.Raycast(
+            bool grounded = Physics.Raycast( //physics engine featuer
                 w.wheelWorldPosition,
                 -transform.up,
                 out hit,
@@ -212,14 +212,14 @@ public class Car : MonoBehaviour
                     else if (w.skidTrail != null)
                     {
                         w.skidTrail.emitting = true;
-                        w.skidTrail.transform.position = hit.point;
+                        w.skidTrail.transform.position = hit.point; //transforms yes
 
                         Vector3 skidDir = Vector3.ProjectOnPlane(w.worldSlipDirection.normalized, hit.normal);
                         if (skidDir.sqrMagnitude < 0.001f)
                             skidDir = Vector3.ProjectOnPlane(wheelObj.forward, hit.normal).normalized;
 
                         Quaternion flatRot = Quaternion.LookRotation(skidDir, hit.normal) * Quaternion.Euler(90f, 0f, 0f);
-                        w.skidTrail.transform.rotation = flatRot;
+                        w.skidTrail.transform.rotation = flatRot; //transforms yes
                     }
                 }
                 else if (w.skidTrail != null && w.skidTrail.emitting)
