@@ -13,20 +13,20 @@ public class WheelProperties
     public float suspensionLength = 0.5f;
 
     [HideInInspector] public float lastSuspensionLength = 0.0f;
-    public float mass = 16f;
-    public float size = 0.5f;  // wheel radius, used for positioning & circumference
-    public float engineTorque = 40f;
-    public float brakeStrength = 0.5f;
-    public bool slidding = false;
+    public float mass = 16f; //Wheel mass
+    public float size = 0.5f; //Wheel radius used for positioning
+    public float engineTorque = 40f; //Torque for each wheel
+    public float brakeStrength = 0.5f; //Brakes for each wheel
+    public bool sliding = false; //Check if car is sliding
     [HideInInspector] public Vector3 worldSlipDirection;
     [HideInInspector] public Vector3 suspensionForceDirection;
     [HideInInspector] public Vector3 wheelWorldPosition;
     [HideInInspector] public float wheelCircumference;
     [HideInInspector] public float torque = 0.0f;
     [HideInInspector] public GameObject wheelObject;
-    [HideInInspector] public Vector3 localVelocity;
-    [HideInInspector] public float normalForce;
-    [HideInInspector] public float angularVelocity;
+    [HideInInspector] public Vector3 localVelocity; //Wheel local velocity (?)
+    [HideInInspector] public float normalForce; //Ground pushing up on the wheel
+    [HideInInspector] public float angularVelocity; //Wheel spin speed rads/sec
     [HideInInspector] public float slip;
     [HideInInspector] public Vector2 input = Vector2.zero;
     [HideInInspector] public float braking = 0;
@@ -35,18 +35,18 @@ public class WheelProperties
 public class Car : MonoBehaviour
 {
     public GameObject skidMarkPrefab;
-    public float smoothTurn = 0.03f;
-    public float linearDamping = 0.2f;
-    public float angularDamping = 0.3f;
-    float coefStaticFriction = 2.95f;
-    float coefKineticFriction = 0.85f;
+    public float smoothTurn = 0.03f; //Steering smoothing
+    public float linearDamping = 0.2f; //Added dampings to simulate reduction in momentum over time (air resistance)
+    public float angularDamping = 0.3f; //Rotation damping
+    float coefStaticFriction = 2.95f; //Friction when driving
+    float coefKineticFriction = 0.85f; //Friction when wheels slide
     public GameObject wheelPrefab;
     public WheelProperties[] wheels;
-    public float wheelGripX = 8f;
-    public float wheelGripZ = 42f;
+    public float wheelGripX = 8f; //Sideways grip
+    public float wheelGripZ = 42f; //Driving direction grip
     public float suspensionForce = 90f;
-    public float dampAmount = 2.5f;
-    public float suspensionForceClamp = 200f;
+    public float dampAmount = 2.5f; //Reduce bounce
+    public float suspensionForceClamp = 200f; //Maximum suspension force, prevents unrealistic bounces
     public Rigidbody rb; //physics engine feature
     [HideInInspector] public bool forwards = true;
 
@@ -172,10 +172,10 @@ public class Car : MonoBehaviour
                 * w.normalForce * coefStaticFriction * Time.fixedDeltaTime;
             float currentMaxFrictionForce = w.normalForce * coefStaticFriction;
 
-            w.slidding = totalLocalForce.magnitude > currentMaxFrictionForce;
+            w.sliding = totalLocalForce.magnitude > currentMaxFrictionForce;
             w.slip = totalLocalForce.magnitude / currentMaxFrictionForce;
             totalLocalForce = Vector3.ClampMagnitude(totalLocalForce, currentMaxFrictionForce);
-            totalLocalForce *= w.slidding ? (coefKineticFriction / coefStaticFriction) : 1;
+            totalLocalForce *= w.sliding ? (coefKineticFriction / coefStaticFriction) : 1;
 
             Vector3 totalWorldForce = wheelObj.TransformDirection(totalLocalForce);
             w.worldSlipDirection = totalWorldForce;
@@ -196,7 +196,7 @@ public class Car : MonoBehaviour
                 // Since pivot is center of wheel mesh, raise wheel by radius to sit properly on ground
                 wheelObj.position = hit.point + transform.up * w.size;
 
-                if (w.slidding)
+                if (w.sliding)
                 {
                     if (w.skidTrail == null && skidMarkPrefab != null)
                     {

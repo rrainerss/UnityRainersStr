@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 
+//This script was needed to create terrains with SetHeight brush since i cant pick the height manually, have to type it in
+
 [InitializeOnLoad]
 public class TerrainHeightDisplay
 {
@@ -11,15 +13,15 @@ public class TerrainHeightDisplay
 
     static void OnSceneGUI(SceneView sceneView)
     {
-        // Get current mouse position in Scene View
+        //Get current mouse position in Scene View
         Event e = Event.current;
         if (e == null) return;
 
-        // Create ray from mouse position
+        //Create ray from mouse position
         Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
         RaycastHit hit;
 
-        // Find the terrain under the mouse ray
+        //Find the terrain under the mouse ray
         Terrain terrain = Terrain.activeTerrain;
         if (terrain == null) return;
 
@@ -41,7 +43,7 @@ public class TerrainHeightDisplay
 
             Handles.EndGUI();
 
-            // Repaint to update every mouse move
+            //Repaint to update every mouse move
             sceneView.Repaint();
         }
     }

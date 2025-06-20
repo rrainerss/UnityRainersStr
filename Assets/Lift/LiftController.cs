@@ -57,29 +57,29 @@ public class LiftController : MonoBehaviour
         if (isPlatformMoving)
         {
             platformMoveProgress += Time.deltaTime / platformMoveDuration;
-            platformMoveProgress = Mathf.Clamp01(platformMoveProgress);
+            platformMoveProgress = Mathf.Clamp01(platformMoveProgress); //These increment progress towards given value
 
-            float eased = Mathf.SmoothStep(0f, 1f, platformMoveProgress);
-            platform.position = Vector3.Lerp(platformStartPos, platformTargetPos, eased);
+            float eased = Mathf.SmoothStep(0f, 1f, platformMoveProgress); //Eased motion
+            platform.position = Vector3.Lerp(platformStartPos, platformTargetPos, eased); //Interpolate pos at an eased rate
 
             if (platformMoveProgress >= 1f)
-                isPlatformMoving = false;
+                isPlatformMoving = false; //Finished
         }
 
         if (areArmsMoving)
         {
             armsMoveProgress += Time.deltaTime / armsMoveDuration;
-            armsMoveProgress = Mathf.Clamp01(armsMoveProgress);
+            armsMoveProgress = Mathf.Clamp01(armsMoveProgress); //Same incrementing
 
-            float eased = Mathf.SmoothStep(0f, 1f, armsMoveProgress);
+            float eased = Mathf.SmoothStep(0f, 1f, armsMoveProgress); //Eased motion
             arm1.position = Vector3.Lerp(arm1StartPos, arm1TargetPos, eased);
             arm2.position = Vector3.Lerp(arm2StartPos, arm2TargetPos, eased);
 
             arm1.localRotation = Quaternion.Slerp(arm1StartRot, arm1TargetRot, eased);
-            arm2.localRotation = Quaternion.Slerp(arm2StartRot, arm2TargetRot, eased);
+            arm2.localRotation = Quaternion.Slerp(arm2StartRot, arm2TargetRot, eased); //Interpolate rot at an eased rate
 
             if (armsMoveProgress >= 1f)
-                areArmsMoving = false;
+                areArmsMoving = false; //Finished
         }
     }
 
