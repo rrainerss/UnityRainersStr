@@ -61,7 +61,7 @@ public class Car : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         if (!rb) rb = gameObject.AddComponent<Rigidbody>();
 
-        foreach (var w in wheels)
+        foreach (var w in wheels) //Wheel creation
         {
             w.wheelObject = Instantiate(wheelPrefab, transform);
             w.wheelObject.transform.localPosition = w.localPosition;
@@ -69,7 +69,7 @@ public class Car : MonoBehaviour
             w.wheelObject.transform.localScale = 2f * new Vector3(w.size, w.size, w.size);
             w.wheelCircumference = 2f * Mathf.PI * w.size;
 
-            if (skidMarkPrefab != null)
+            if (skidMarkPrefab != null) //Skidmark init
             {
                 w.skidTrailGameObject = Instantiate(skidMarkPrefab, w.wheelObject.transform);
                 w.skidTrailGameObject.transform.localPosition = Vector3.zero;
@@ -82,47 +82,49 @@ public class Car : MonoBehaviour
             }
         }
 
+        //Physics for stability
         rb.centerOfMass += new Vector3(0, -0.5f, 0);
-        rb.inertiaTensor *= 1.4f;
+        rb.inertiaTensor *= 1.4f; //Resistance to rotation
         rb.linearDamping = linearDamping;
         rb.angularDamping = angularDamping;
     }
 
     void Update()
     {
-        float speedFactor = Mathf.Clamp01(rb.linearVelocity.magnitude / 30f);
-        float steerInputTarget = Input.GetAxisRaw("Horizontal") * Mathf.Lerp(1f, 0.1f, speedFactor * speedFactor);
-        userInput.x = Mathf.Lerp(userInput.x, steerInputTarget, Mathf.Lerp(0.1f, 0.3f, 1f - speedFactor)); //interpolation lerp
+        float speedFactor = Mathf.Clamp01(rb.linearVelocity.magnitude / 30f); //Speed realtive to max speed
+        float steerInputTarget = Input.GetAxisRaw("Horizontal") * Mathf.Lerp(1f, 0.1f, speedFactor * speedFactor); //Steering input, reduced at high speeds
+        userInput.x = Mathf.Lerp(userInput.x, steerInputTarget, Mathf.Lerp(0.1f, 0.3f, 1f - speedFactor)); //Smoothly interpolates to new steered target
 
-        userInput.y = Mathf.Lerp(userInput.y, Input.GetAxisRaw("Vertical"), 0.2f); //interpolation lerp
+        userInput.y = Mathf.Lerp(userInput.y, Input.GetAxisRaw("Vertical"), 0.2f); //Throttle/brake and acceleration value (default 0.2)
         bool isBraking = Input.GetKey(KeyCode.S) && forwards;
-        if (isBraking) userInput.y = 0;
+        if (isBraking) userInput.y = 0; //If brake remove throttle
 
         float maxSlip = 0;
         for (int i = 0; i < wheels.Length; i++)
-            maxSlip = Mathf.Max(maxSlip, wheels[i].slip);
+            maxSlip = Mathf.Max(maxSlip, wheels[i].slip); //Measures wheel slip
 
         for (int i = 0; i < wheels.Length; i++)
         {
             if (throttleAssist && maxSlip > 0.96f)
-                userInput.y = Mathf.Lerp(userInput.y, 0, maxSlip); //interpolation lerp
+                userInput.y = Mathf.Lerp(userInput.y, 0, maxSlip); //Reduce throttle to reduce wheelspin
 
             if (steeringAssist && maxSlip > 0.7f)
-                userInput.x = Mathf.Lerp(userInput.x, 0, 0.05f); //interpolation lerp
+                userInput.x = Mathf.Lerp(userInput.x, 0, 0.05f); //Steering assist reduces steer angle
 
             if (maxSlip > 1.0f && wheels[i].localVelocity.magnitude > 0.1f)
             {
+                //This is literally traction control, realigns steering to straighten car in extreme slip
                 float angle = Mathf.Atan2(wheels[i].localVelocity.x, wheels[i].localVelocity.z) * Mathf.Rad2Deg;
                 wheels[i].input = new Vector2(
-                    Mathf.Lerp(wheels[i].input.x, Mathf.Clamp(angle / wheels[i].turnAngle, -1f, 1f), 0.1f), //interpolation lerp
+                    Mathf.Lerp(wheels[i].input.x, Mathf.Clamp(angle / wheels[i].turnAngle, -1f, 1f), 0.1f),
                     wheels[i].input.y
                 );
             }
 
-            if (brakeAssist && maxSlip > 0.99f)
+            if (brakeAssist && maxSlip > 0.99f) //Basically real car ABS system
                 isBraking = false;
 
-            wheels[i].braking = Mathf.Lerp(wheels[i].braking, (float)(isBraking ? 1 : 0), 0.2f); //interpolation lerp
+            wheels[i].braking = Mathf.Lerp(wheels[i].braking, (float)(isBraking ? 1 : 0), 0.2f); //Sets inputs to smoothed values
             wheels[i].input = new Vector2(userInput.x, userInput.y);
         }
     }

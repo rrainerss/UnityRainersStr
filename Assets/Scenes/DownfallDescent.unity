@@ -3475,6 +3475,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7701622771091874021, guid: fa6d152d2a5266546a267d5fa4487676, type: 3}
+      propertyPath: dampAmount
+      value: 2.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7701622771091874021, guid: fa6d152d2a5266546a267d5fa4487676, type: 3}
       propertyPath: wheelGripX
       value: 3
       objectReference: {fileID: 0}
