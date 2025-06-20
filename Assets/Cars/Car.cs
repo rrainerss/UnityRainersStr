@@ -131,7 +131,7 @@ public class Car : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.AddForce(-transform.up * rb.linearVelocity.magnitude * downforce); //physics engine feature
+        rb.AddForce(-transform.up * rb.linearVelocity.magnitude * downforce); //Apply downforce
 
         foreach (var w in wheels)
         {
@@ -142,7 +142,7 @@ public class Car : MonoBehaviour
 
             wheelObj.localRotation = Quaternion.Euler(0, w.turnAngle * w.input.x, 0);
             w.wheelWorldPosition = transform.TransformPoint(w.localPosition);
-            Vector3 velocityAtWheel = rb.GetPointVelocity(w.wheelWorldPosition); //physicsenginefeature
+            Vector3 velocityAtWheel = rb.GetPointVelocity(w.wheelWorldPosition);
             w.localVelocity = wheelObj.InverseTransformDirection(velocityAtWheel);
             forwards = w.localVelocity.z > 0.1f;
             w.torque = w.engineTorque * w.input.y;
@@ -150,7 +150,7 @@ public class Car : MonoBehaviour
             float inertia = w.mass * w.size * w.size / 2f;
             float lateralVel = w.localVelocity.x;
 
-            bool grounded = Physics.Raycast( //physics engine featuer
+            bool grounded = Physics.Raycast( //Check if wheel is grounded
                 w.wheelWorldPosition,
                 -transform.up,
                 out hit,
@@ -195,7 +195,7 @@ public class Car : MonoBehaviour
                 rb.AddForceAtPosition(springDir + totalWorldForce, hit.point);
                 w.lastSuspensionLength = hit.distance;
 
-                // Since pivot is center of wheel mesh, raise wheel by radius to sit properly on ground
+                //Raise wheel by its radius, only somewhat fixes the floating issue
                 wheelObj.position = hit.point + transform.up * w.size;
 
                 if (w.sliding)
@@ -214,14 +214,14 @@ public class Car : MonoBehaviour
                     else if (w.skidTrail != null)
                     {
                         w.skidTrail.emitting = true;
-                        w.skidTrail.transform.position = hit.point; //transforms yes
+                        w.skidTrail.transform.position = hit.point;
 
                         Vector3 skidDir = Vector3.ProjectOnPlane(w.worldSlipDirection.normalized, hit.normal);
                         if (skidDir.sqrMagnitude < 0.001f)
                             skidDir = Vector3.ProjectOnPlane(wheelObj.forward, hit.normal).normalized;
 
                         Quaternion flatRot = Quaternion.LookRotation(skidDir, hit.normal) * Quaternion.Euler(90f, 0f, 0f);
-                        w.skidTrail.transform.rotation = flatRot; //transforms yes
+                        w.skidTrail.transform.rotation = flatRot;
                     }
                 }
                 else if (w.skidTrail != null && w.skidTrail.emitting)
