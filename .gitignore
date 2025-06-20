@@ -85,6 +85,3 @@ crashlytics-build.properties
 
 # Package Manager cache
 /Packages/packages-lock.json
-
-# Downloaded asset folders
-/[Aa]ssets/asset_free_Ukraine_cars/
